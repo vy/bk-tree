@@ -96,6 +96,22 @@ Here is an example about how to used supplied interface.
        do (format t "~a ~a~%" distance value)))
 
 
+-- '(C . A U T I O N S) --------------------------------------------------------
+
+For performance reasons, LEVENSHTEIN function coming with the package has some
+limitations both on the input string and penalty costs.
+
+  (deftype levenshtein-cost ()
+    "Available penalty costs."
+    '(integer 0 7))
+
+  (deftype levenshtein-input-length ()
+    "Maximum distance a comparison can result."
+    `(integer 0 ,(- most-positive-fixnum 7)))
+
+Just in case, configure these variables suitable to your needs.
+
+
 -- '(L . I C E N S E) ----------------------------------------------------------
 
 Copyright (c) 2007, Volkan YAZICI <yazicivo@ttnet.net.tr>

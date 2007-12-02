@@ -25,10 +25,19 @@
 
 (in-package :bk-tree)
 
+(deftype levenshtein-cost ()
+  "Available penalty costs."
+  '(integer 0 7))
+
+(deftype levenshtein-max-distance ()
+  "Maximum distance a comparison can result."
+  `(integer 0 ,(- most-positive-fixnum 7)))
+
 (defun levenshtein (src dst &key (insert-cost 1) (delete-cost 1) (substitute-cost 1))
   "An O(mn) implementation of the Levenshtein distance metric."
-  (check-type src string)
-  (check-type dst string)
+  (declare (type simple-string src dst)
+           (type levenshtein-cost insert-cost delete-cost substitute-cost))
+  (declare (optimize speed))
   (let ((ls (1+ (length src)))
         (ld (1+ (length dst))))
     ;; Validate supplied strings.
@@ -39,8 +48,9 @@
        ;; Instead of building an (m+1)x(n+1) array, we'll use two different
        ;; arrays of size m+1 and n+1 for storing accumulated values in previous
        ;; calls.
-       (let ((prev (make-array ls))
-             (curr (make-array ls)))
+       (let ((prev (make-array ls :element-type 'levenshtein-max-distance))
+             (curr (make-array ls :element-type 'levenshtein-max-distance)))
+         (declare (type (simple-array levenshtein-max-distance (*)) prev curr))
          ;; Initialize the "previous" row.
          (loop for i from 0 below ls
                do (setf (elt prev i) i))
