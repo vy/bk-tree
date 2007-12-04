@@ -33,6 +33,7 @@
     :accessor distance-of
     :documentation "Metric distance between current node and its parent.")
    (value
+    :initform nil
     :initarg :value
     :accessor value-of)
    (nodes
@@ -59,17 +60,21 @@
 
 (defun insert-value (value tree &key (metric #'levenshtein))
   "Inserts given VALUE into supplied TREE."
-  (let ((distance (funcall metric value (value-of tree))))
-    ;; Check if we try to duplicate an existing entry.
-    (if (zerop distance)
-        (error 'duplicate-value :value value))
-    ;; Find an appropriate place to insert the value.
-    (let ((sub-tree
-           (find distance (nodes-of tree) :test #'= :key #'distance-of)))
-      (if sub-tree
-          (insert-value value sub-tree)
-          (push (make-instance 'bk-tree :distance distance :value value)
-                (nodes-of tree))))))
+  (if (null (value-of tree))
+      ;; If tree has no value yet, insert value here.
+      (setf (value-of tree) value)
+      ;; Otherwise, look for a suitable place.
+      (let ((distance (funcall metric value (value-of tree))))
+        ;; Check if we try to duplicate an existing entry.
+        (if (zerop distance)
+            (error 'duplicate-value :value value))
+        ;; Find an appropriate place to insert the value.
+        (let ((sub-tree
+               (find distance (nodes-of tree) :test #'= :key #'distance-of)))
+          (if sub-tree
+              (insert-value value sub-tree)
+              (push (make-instance 'bk-tree :distance distance :value value)
+                    (nodes-of tree)))))))
 
 (defun search-value (value tree &key (threshold 1) (metric #'levenshtein))
   "Searches given VALUE in the supplied TREE."

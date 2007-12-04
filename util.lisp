@@ -37,7 +37,7 @@
   "An O(mn) implementation of the Levenshtein distance metric."
   (declare (type simple-string src dst)
            (type levenshtein-cost insert-cost delete-cost substitute-cost))
-  (declare (optimize speed))
+  (declare (optimize (speed 3)))
   (let ((ls (1+ (length src)))
         (ld (1+ (length dst))))
     ;; Validate supplied strings.
