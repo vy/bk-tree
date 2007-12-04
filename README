@@ -64,10 +64,12 @@ Here is an example about how to used supplied interface.
     (error "*WORDS* is empty!"))
 
 ;; Fill the *TREE*.
-(loop for word in (rest *words*)
-      do (handler-case (insert-value word *tree*)
-           (duplicate-value (ctx)
-             (format t "Duplicated: ~a~%" word))))
+(mapc
+ (handler-case (insert-value word *tree*)
+   (duplicate-value (ctx)
+     (declare (ignore ctx)
+     (format t "Duplicated: ~a~%" word))))
+ *words*)
 
 ;; Let's see that green tree.
 (print-tree *tree*)
