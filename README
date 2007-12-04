@@ -49,7 +49,7 @@ Here is an example about how to used supplied interface.
 (in-package :bk-tree-test)
 
 (defvar *words* nil)
-(defvar *tree* nil)
+(defvar *tree* (make-instance 'bk-tree))
 
 ;; Build *WORDS* list and *TREE*.
 (with-open-file (in "/home/vy/lisp/english-words.txt")
@@ -63,8 +63,7 @@ Here is an example about how to used supplied interface.
 (if (endp *words*)
     (error "*WORDS* is empty!"))
 
-;; Initialize & fill the *TREE*.
-(setq *tree* (make-instance 'bk-tree :value (first *words*)))
+;; Fill the *TREE*.
 (loop for word in (rest *words*)
       do (handler-case (insert-value word *tree*)
            (duplicate-value (ctx)
