@@ -41,6 +41,59 @@ There is no restriction on the type of the value which will be stored in the
 tree, as long as you supply appropriate metric function.
 
 
+-- '(P . E R F O R M A N C E) --------------------------------------------------
+
+Here is the results of a detailed test performed using BK-TREE package.
+
+In every test, 100 random words are searched in the randomly created word
+databases. Words stored in the database are varying from 5 characters upto 10
+characters.
+
+  DB Size | Threshold  | Scanned Node | Found Node
+  (words) | (distance) |  Percentage  | Percentage
+ ---------+------------+--------------+------------
+   10,000 |          1 |        0.11  |      0.01
+          |          2 |        0.11  |      0.01
+          |          3 |        0.11  |      0.01
+          |          4 |        0.16  |      0.03
+          |          5 |        0.37  |      0.11
+          |          6 |        7.6   |      6.58
+          |          7 |       24.46  |     23.43
+          |          8 |       51.36  |     49.09
+ ---------+------------+---------------+------------
+   50,000 |          1 |       0.0022 |      0.002
+          |          2 |       0.0023 |      0.0021
+          |          3 |       0.0251 |      0.003
+          |          4 |       0.0408 |      0.0127
+          |          5 |       0.3943 |      0.3196
+          |          6 |       2.543  |      2.3869
+          |          7 |       7.6876 |      7.3874
+          |          8 |      23.6635 |     22.9339
+ ---------+------------+--------------+-------------
+  100,000 |          1 |       0.0012 |      0.0010
+          |          2 |       0.0012 |      0.0011
+          |          3 |       0.0013 |      0.0017
+          |          4 |       0.0231 |      0.0085
+          |          5 |       0.3383 |      0.2998
+          |          6 |       1.7957 |      1.7079
+          |          7 |       6.3571 |      6.1654
+          |          8 |      18.5599 |     18.0996
+ ---------+------------+--------------+-------------
+  500,000 |          1 |       0.0027 |      0.0002
+          |          2 |       0.0029 |      0.0002
+          |          3 |       0.0039 |      0.0011
+          |          4 |       0.0012 |      0.0081
+          |          5 |       0.3444 |      0.3213
+          |          6 |       0.4244 |      0.4201
+          |          7 |      13.4834 |     13.3619
+          |          8 |      30.3728 |     30.1665
+
+How this table should be interpreted? The lower the difference between the third
+and fourth columns, the less redundant node visit performed. And the stability
+of this difference (which means no fluctuations in the difference) indicates the
+stability of the convergence.
+
+
 -- '(E . X A M P L E) ----------------------------------------------------------
 
 Here is an example about how to used supplied interface.
