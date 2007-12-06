@@ -40,6 +40,11 @@ distance to value being searched:
 There is no restriction on the type of the value which will be stored in the
 tree, as long as you supply appropriate metric function.
 
+During search, found results are signaled in order by their distance costs and
+depths in the branches. Therefore, signaled results appear from the nearest
+result to the most distinct result satisfying the supplied threshold. In other
+words, a second sorting phase is not needed.
+
 
 -- '(P . E R F O R M A N C E) --------------------------------------------------
 
