@@ -37,6 +37,8 @@
            :search-value
            :collect-search-results
            :print-tree
+           :maximum-depth
+           :average-children-count
            :levenshtein
            :levenshtein-cost
            :levenshtein-max-distance))

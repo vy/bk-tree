@@ -142,3 +142,24 @@
   (mapc
    (lambda (tree) (print-tree tree :stream stream :depth (+ 4 depth)))
    (sort (copy-list (nodes-of tree)) #'< :key #'distance-of)))
+
+(defun maximum-depth (tree)
+  "Returns maximum depth of the TREE."
+  (labels ((scan (tree depth)
+             (max depth
+                  (loop for node in (nodes-of tree)
+                        maximize (scan node (1+ depth))))))
+    (scan tree 0)))
+
+(defun average-children-count (tree)
+  "Returns average children count per node of the supplied TREE."
+  (let ((n-children 0)
+        (n-node 0))
+    (labels ((scan (tree)
+               ;; Count children, unless this is a leaf node.
+               (unless (null (nodes-of tree))
+                 (incf n-node)
+                 (incf n-children (length (nodes-of tree)))
+                 (mapc #'scan (nodes-of tree)))))
+      (scan tree))
+    (if (zerop n-node) 0 (/ n-children n-node))))
