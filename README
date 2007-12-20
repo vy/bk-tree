@@ -104,7 +104,7 @@ Here is an example about how to used supplied interface.
 (defvar *words* nil)
 (defvar *tree* (make-instance 'bk-tree))
 
-;; Build *WORDS* list and *TREE*.
+;; Build *WORDS* list.
 (with-open-file (in "/home/vy/lisp/english-words.txt")
   (loop for line = (read-line in nil nil)
         while line
@@ -120,8 +120,7 @@ Here is an example about how to used supplied interface.
 (mapc
  (handler-case (insert-value word *tree*)
    (duplicate-value (ctx)
-     (declare (ignore ctx)
-     (format t "Duplicated: ~a~%" word))))
+     (format t "Duplicated: ~a~%" (value-of ctx))))
  *words*)
 
 ;; Let's see that green tree.
