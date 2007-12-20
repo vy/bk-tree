@@ -43,25 +43,20 @@
     :accessor nodes-of
     :documentation "Nodes collected under this node.")))
 
+(defclass search-result ()
+  ((distance
+    :initarg :distance
+    :type unsigned-byte
+    :accessor distance-of)
+   (value
+    :initarg :value
+    :accessor value-of)))
+
 (define-condition duplicate-value (error)
   ((value
     :initarg :value
     :accessor value-of))
   (:documentation "Signaled upon every duplicated entry insertion."))
-
-(define-condition search-result ()
-  ((distance
-    :initarg :distance
-    :accessor distance-of)
-   (value
-    :initarg :value
-    :accessor value-of))
-  (:documentation "Signaled upon every successful search result."))
-
-(define-condition search-exhausted ()
-  ()
-  (:documentation "Signaled when it is guaranteed that no more results can be
-  returned."))
 
 (defun insert-value (value tree &key (metric #'levenshtein))
   "Inserts given VALUE into supplied TREE."
@@ -81,55 +76,66 @@
               (push (make-instance 'bk-tree :distance distance :value value)
                     (nodes-of tree)))))))
 
-(defun search-value (value tree &key (threshold 1) (metric #'levenshtein))
-  "Searches given VALUE in the supplied TREE."
+(defun search-value (value tree search-exhausted submit-result
+                     &key (threshold 1) (metric #'levenshtein))
+  "Searches given VALUE in the supplied TREE. Calls SUBMIT-RESULT function
+during every found result satisfying supplied THRESHOLD. Finalizes search via
+calling SEARCH-EXHAUSTED when THRESHOLD could not be satisfied anymore."
   (let ((distance (funcall metric value (value-of tree))))
     ;; Check if there is any sub-trees available to search.
-    (handler-case
-        (unless (endp (nodes-of tree))
-          (let ((nodes
-                 ;; Sort available sub-trees collected under this
-                 ;; tree, according to absolute difference between
-                 ;; DISTANCE and SUB-DISTANCE.
-                 (sort (mapcar
-                        (lambda (sub-tree)
-                          ;; (SUB-DISTANCE . SUB-TREE) pairs.
-                          (cons (abs (- distance (distance-of sub-tree)))
-                                sub-tree))
-                        (nodes-of tree))
-                       #'<
-                       :key #'car)))
-            ;; Scan sub-trees.
-            (loop for (sub-distance . sub-tree) in nodes
-                  while (<= sub-distance threshold)
-                  do (search-value value
-                                   sub-tree
-                                   :threshold threshold
-                                   :metric metric))))
-      ;; Search is exhausted. Skip scanning other sub-trees.
-      (search-exhausted () nil))
-    ;; After scanning sub-trees, if appropriate, signal this one.
+    (unless (endp (nodes-of tree))
+      (block sub-tree-search
+        (let ((sub-search-exhausted
+               (lambda ()
+                 (return-from sub-tree-search)))
+              (nodes
+               ;; Sort available sub-trees collected under this
+               ;; tree, according to absolute difference between
+               ;; DISTANCE and SUB-DISTANCE.
+               (sort (mapcar
+                      (lambda (sub-tree)
+                        ;; (SUB-DISTANCE . SUB-TREE) pairs.
+                        (cons (abs (- distance (distance-of sub-tree)))
+                              sub-tree))
+                      (nodes-of tree))
+                     #'<
+                     :key #'car)))
+          ;; Scan sub-trees.
+          (loop for (sub-distance . sub-tree) in nodes
+                while (<= sub-distance threshold)
+                do (search-value value
+                                 sub-tree
+                                 sub-search-exhausted
+                                 submit-result
+                                 :threshold threshold
+                                 :metric metric)))))
+    ;; After scanning sub-trees, if appropriate, submit this one.
     (if (<= distance threshold)
-        (restart-case
-            (signal 'search-result :distance distance :value (value-of tree))
-          ;; Do nothing, continue searching.
-          (continue-searching () nil))
+        ;; Submit current node.
+        (funcall submit-result distance (value-of tree))
         ;; If threshold limit is not reached, then search is exhausted.
-        (signal 'search-exhausted))))
+        (funcall search-exhausted))))
 
 (defun collect-search-results (value tree &rest keys &key (limit 50) &allow-other-keys)
-  "Convenient function to collect signaled SEARCH-RESULTs."
+  "Convenient function to search supplied VALUE in the specified TREE. Function
+returns a list of SEARCH-RESULT objects."
   (let ((count 0)
         results)
-    (handler-bind
-        ((search-result
-          (lambda (result)
-            (push result results)
-            (incf count)
-            (if (< count limit)
-                (invoke-restart 'continue-searching)))))
-      (apply #'search-value value tree :allow-other-keys t keys))
-    (nreverse results)))
+    (labels ((search-exhausted ()
+               "Return from the outmost stack with collected results so far."
+               (return-from collect-search-results (nreverse results)))
+             (submit-result (distance value)
+               "Submit a found result."
+               (push
+                (make-instance 'search-result :distance distance :value value)
+                results)
+               (incf count)
+               (if (not (< count limit))
+                   (search-exhausted))))
+      (apply #'search-value
+             value tree #'search-exhausted #'submit-result
+             :allow-other-keys t keys)
+      (search-exhausted))))
 
 (defun print-tree (tree &key (stream *standard-output*) (depth 0))
   "Prints supplied BK-TREE in a human-readable format."
