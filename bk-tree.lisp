@@ -72,7 +72,7 @@
         (let ((sub-tree
                (find distance (nodes-of tree) :test #'= :key #'distance-of)))
           (if sub-tree
-              (insert-value value sub-tree)
+              (insert-value value sub-tree :metric metric)
               (push (make-instance 'bk-tree :distance distance :value value)
                     (nodes-of tree)))))))
 
