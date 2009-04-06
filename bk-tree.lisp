@@ -1,4 +1,4 @@
-;;; Copyright (c) 2007, Volkan YAZICI <yazicivo@ttnet.net.tr>
+;;; Copyright (c) 2007-2009, Volkan YAZICI <volkan.yazici@gmail.com>
 ;;; All rights reserved.
 
 ;;; Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,13 @@
     :accessor nodes-of
     :documentation "Nodes collected under this node.")))
 
+(defmethod print-object ((self bk-tree) stream)
+  (print-unreadable-object (self stream :type t :identity t)
+    (format stream ":DISTANCE ~D :VALUE ~S :NODES ~S"
+            (distance-of self)
+            (value-of self)
+            (mapcar #'value-of (nodes-of self)))))
+
 (defclass search-result ()
   ((distance
     :initarg :distance
@@ -51,6 +58,12 @@
    (value
     :initarg :value
     :accessor value-of)))
+
+(defmethod print-object ((self search-result) stream)
+  (print-unreadable-object (self stream :type t :identity t)
+    (format stream ":DISTANCE ~D :VALUE ~S"
+            (distance-of self)
+            (value-of self))))
 
 (define-condition duplicate-value (error)
   ((value
@@ -84,28 +97,26 @@ calling SEARCH-EXHAUSTED when THRESHOLD could not be satisfied anymore."
   (let ((distance (funcall metric value (value-of tree))))
     ;; Check if there is any sub-trees available to search.
     (unless (endp (nodes-of tree))
-      (block sub-tree-search
-        (let ((sub-search-exhausted
-               (lambda ()
-                 (return-from sub-tree-search)))
-              (nodes
-               ;; Sort available sub-trees collected under this
-               ;; tree, according to absolute difference between
-               ;; DISTANCE and SUB-DISTANCE.
-               (sort (mapcar
-                      (lambda (sub-tree)
-                        ;; (SUB-DISTANCE . SUB-TREE) pairs.
-                        (cons (abs (- distance (distance-of sub-tree)))
-                              sub-tree))
-                      (nodes-of tree))
-                     #'<
-                     :key #'car)))
-          ;; Scan sub-trees.
-          (loop for (sub-distance . sub-tree) in nodes
-                while (<= sub-distance threshold)
-                do (search-value value
+      (loop for (sub-distance . sub-tree) in
+            ;; Sort available sub-trees collected under this
+            ;; tree, according to absolute difference between
+            ;; DISTANCE and SUB-DISTANCE.
+            (sort (mapcar
+                    (lambda (sub-tree)
+                      ;; (SUB-DISTANCE . SUB-TREE) pairs.
+                      (cons (abs (- distance (distance-of sub-tree)))
+                            sub-tree))
+                    (nodes-of tree))
+                  #'<
+                  :key #'car)
+            ;; Scan sub-trees.
+            while (<= sub-distance threshold)
+            do (block sub-tree-search
+                 (flet ((sub-search-exhausted ()
+                          (return-from sub-tree-search)))
+                   (search-value value
                                  sub-tree
-                                 sub-search-exhausted
+                                 #'sub-search-exhausted
                                  submit-result
                                  :threshold threshold
                                  :metric metric)))))
@@ -142,7 +153,7 @@ returns a list of SEARCH-RESULT objects."
   ;; Print current value first.
   (format stream "~&")
   (loop repeat depth do (write-char #\space stream))
-  (format stream "-> ~a" (value-of tree))
+  (format stream "-> (~d) ~a" (distance-of tree) (value-of tree))
   ;; Iterate across sub-trees, according to their distances from root
   ;; node.
   (mapc

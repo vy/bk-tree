@@ -1,4 +1,4 @@
-;;; Copyright (c) 2007, Volkan YAZICI <yazicivo@ttnet.net.tr>
+;;; Copyright (c) 2007-2009, Volkan YAZICI <volkan.yazici@gmail.com>
 ;;; All rights reserved.
 
 ;;; Redistribution and use in source and binary forms, with or without
