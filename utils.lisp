@@ -25,6 +25,12 @@
 
 (in-package :bk-tree)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Levenshtein Metric Related Definitions
+;;;
+
 (deftype levenshtein-cost ()
   "Available penalty costs."
   '(integer 0 7))

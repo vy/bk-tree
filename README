@@ -1,4 +1,24 @@
--- '(A . B O U T) --------------------------------------------------------------
+
+      ___           ___
+     /  /\         /  /\
+    /  /::\       /  /:/
+   /  /:/\:\     /  /:/
+  /  /::\ \:\   /  /::\____
+ /__/:/\:\_\:| /__/:/\:::::\
+ \  \:\ \:\/:/ \__\/~|:|~~~~              ___           ___           ___
+  \  \:\_\::/     |  |:|    ___          /  /\         /  /\         /  /\
+   \  \:\/:/      |  |:|   /__/\        /  /::\       /  /::\       /  /::\
+    \__\::/       |__|:|   \  \:\      /  /:/\:\     /  /:/\:\     /  /:/\:\
+        ~~         \__\|    \__\:\    /  /::\ \:\   /  /::\ \:\   /  /::\ \:\
+                            /  /::\  /__/:/\:\_\:\ /__/:/\:\ \:\ /__/:/\:\ \:\
+                           /  /:/\:\ \__\/~|::\/:/ \  \:\ \:\_\/ \  \:\ \:\_\/
+                          /  /:/__\/    |  |:|::/   \  \:\ \:\    \  \:\ \:\
+                         /__/:/         |  |:|\/     \  \:\_\/     \  \:\_\/
+                         \__\/          |__|:|~       \  \:\        \  \:\
+                                         \__\|         \__\/         \__\/
+
+
+-- '( A B O U T ) --------------------------------------------------------------
 
 This program implements a derivative of BK-Tree data structure described in
 "Some Approaches to Best-Match File Searching" paper of W. A. Burkhard and
@@ -41,7 +61,7 @@ There is no restriction on the type of the value which will be stored in the
 tree, as long as you supply appropriate metric function.
 
 
--- '(P . E R F O R M A N C E) --------------------------------------------------
+-- '( P E R F O R M A N C E ) --------------------------------------------------
 
 Here is the results of a detailed test performed using BK-TREE package.
 
@@ -94,14 +114,16 @@ of this difference (which means no fluctuations in the difference) indicates the
 stability of the convergence.
 
 
--- '(E . X A M P L E) ----------------------------------------------------------
+-- '( E X A M P L E ) ----------------------------------------------------------
 
 Here is an example about how to used supplied interface.
 
 (defpackage :bk-tree-test (:use :cl :bk-tree))
+
 (in-package :bk-tree-test)
 
 (defvar *words* nil)
+
 (defvar *tree* (make-instance 'bk-tree))
 
 ;; Build *WORDS* list.
@@ -118,9 +140,10 @@ Here is an example about how to used supplied interface.
 
 ;; Fill the *TREE*.
 (mapc
- (handler-case (insert-value word *tree*)
-   (duplicate-value (ctx)
-     (format t "Duplicated: ~a~%" (value-of ctx))))
+ (lambda (word)
+   (handler-case (insert-value word *tree*)
+     (duplicate-value (ctx)
+       (format t "Duplicated: ~a~%" (value-of ctx)))))
  *words*)
 
 ;; Let's see that green tree.
@@ -131,7 +154,7 @@ Here is an example about how to used supplied interface.
  (mapc
   (lambda (result)
     (format t "~a ~a~%" (distance-of result) (value-of result)))
-  (collect-search-results "kernel" *tree* :threshold 2)))
+  (search-value "kernel" *tree* :threshold 2)))
 
 ;; Test brute levenshtein.
 (time
@@ -149,7 +172,7 @@ Here is an example about how to used supplied interface.
        do (format t "~a ~a~%" distance value)))
 
 
--- '(C . A U T I O N S) --------------------------------------------------------
+-- '( C A U T I O N S ) --------------------------------------------------------
 
 For performance reasons, LEVENSHTEIN function coming with the package has some
 limitations both on the input string and penalty costs.
@@ -165,7 +188,7 @@ limitations both on the input string and penalty costs.
 Just in case, configure these variables suitable to your needs.
 
 
--- '(L . I C E N S E) ----------------------------------------------------------
+-- '( L I C E N S E ) ----------------------------------------------------------
 
 Copyright (c) 2007-2009, Volkan YAZICI <volkan.yazici@gmail.com>
 All rights reserved.

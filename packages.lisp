@@ -25,6 +25,12 @@
 
 (in-package :cl-user)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Package Definitions
+;;;
+
 (defpackage :bk-tree
   (:use :cl)
   (:export :bk-tree
@@ -35,7 +41,6 @@
            :search-result
            :insert-value
            :search-value
-           :collect-search-results
            :print-tree
            :maximum-depth
            :average-children-count

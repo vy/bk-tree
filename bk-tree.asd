@@ -28,5 +28,6 @@
 (asdf:defsystem :bk-tree
   :serial t
   :components ((:file "packages")
-               (:file "util")
+               (:file "specials")
+               (:file "utils")
                (:file "bk-tree")))
