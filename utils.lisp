@@ -48,8 +48,8 @@
         (ld (1+ (length dst))))
     ;; Validate supplied strings.
     (cond
-      ((= 1 ls) ls)
-      ((= 1 ld) ld)
+      ((= 1 ls) (1- ld))
+      ((= 1 ld) (1- ls))
       (t
        ;; Instead of building an (m+1)x(n+1) array, we'll use two different
        ;; arrays of size m+1 and n+1 for storing accumulated values in previous
