@@ -67,8 +67,8 @@
               (push (make-instance 'bk-tree :distance distance :value value)
                     (nodes-of tree)))))))
 
-(defun search-value (value tree &key (threshold 1) (metric #'levenshtein)
-                     limit ordered-results ordered-traversal)
+(defun hairy-search-value (value tree &key (threshold 1) (metric #'levenshtein)
+                           limit ordered-results ordered-traversal)
   "Return a list of `SEARCH-RESULT' instances built from `TREE' and its children
 whose value is no more distant from `VALUE' than `THRESHOLD', using `METRIC' to
 measure the distance.
@@ -82,7 +82,10 @@ their distances from `VALUES'.
 If `ORDERED-TRAVERSAL' is non-NIL, candidates in a level (e.g. children of a
 validated node) will be traversed in sorted order according to the absolute
 difference between the parent distance and child distance -- the (probably) more
-similar is first."
+similar is first.
+
+`HAIRY-SEARCH-VALUE' is a feature rich and hence slower derivative of
+`SEARCH-VALUE'. For simple query patterns, consider using `SEARCH-VALUE'."
   (when (and tree (value-of tree))
     (let ((results)
           (count 0))
@@ -122,6 +125,34 @@ similar is first."
       (if ordered-results
           (sort results #'< :key #'distance-of)
           results))))
+
+(defun search-value (value tree &key (threshold 1) (metric #'levenshtein)
+                     ordered-results)
+  "Return a list of `SEARCH-RESULT' instances built from `TREE' and its children
+whose value is no more distant from `VALUE' than `THRESHOLD', using `METRIC' to
+measure the distance.
+
+If `ORDERED-RESULTS' is non-NIL, collected results will be sorted according to
+their distances from `VALUE'."
+  (let (results)
+    (labels ((%search (tree)
+               (let ((distance (funcall metric value (value-of tree))))
+                 ;; Scan children.
+                 (dolist (node (nodes-of tree))
+                   (unless (< threshold (abs (- distance (distance-of node))))
+                     (%search node)))
+                 ;; Submit current node, if appropriate.
+                 (when (< threshold distance)
+                   (push
+                    (make-instance
+                     'search-result
+                     :distance distance
+                     :value (value-of tree))
+                    results)))))
+      (%search tree))
+    (if ordered-results
+        (sort results #'< :key #'distance-of)
+        results)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

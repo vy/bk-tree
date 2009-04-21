@@ -40,6 +40,7 @@
            :duplicate-value
            :search-result
            :insert-value
+           :hairy-search-value
            :search-value
            :print-tree
            :maximum-depth
