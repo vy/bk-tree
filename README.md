@@ -45,7 +45,7 @@ In the implementation, I have used below structure to store values in the nodes:
 
 See below figure for an example.
 
-![Example BK-Tree][https://raw.github.com/vy/bk-tree/master/README.bktree.png]
+![Example BK-Tree](https://raw.github.com/vy/bk-tree/master/README.bktree.png)
 
 During every search phase, instead of walking through nodes via
 
@@ -107,7 +107,7 @@ How this table should be interpreted? The lower the difference between the third
 
 Here is the graph of above results.
 
-![Results][https://raw.github.com/vy/bk-tree/master/README.report.png]
+![Results](https://raw.github.com/vy/bk-tree/master/README.report.png)
 
 
 Example
